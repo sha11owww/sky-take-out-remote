@@ -9,9 +9,11 @@ import com.sky.context.BaseContext;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.dto.EmployeePageQueryDTO;
+import com.sky.dto.PasswordEditDTO;
 import com.sky.entity.Employee;
 import com.sky.exception.AccountLockedException;
 import com.sky.exception.AccountNotFoundException;
+import com.sky.exception.PasswordEditFailedException;
 import com.sky.exception.PasswordErrorException;
 import com.sky.mapper.EmployeeMapper;
 import com.sky.result.PageResult;
@@ -85,6 +87,11 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     }
 
+    /**
+     * 分页查询
+     * @param employeePageQueryDTO
+     * @return
+     */
     @Override
     public PageResult page(EmployeePageQueryDTO employeePageQueryDTO) {
         PageHelper.startPage(employeePageQueryDTO.getPage(), employeePageQueryDTO.getPageSize());
@@ -92,5 +99,58 @@ public class EmployeeServiceImpl implements EmployeeService {
         Page<Employee> page =employeeMapper.queryPage(employeePageQueryDTO);
         return new PageResult(page.getTotal(), page.getResult());
     }
+    /**
+     * 根据id查询员工信息
+     * @param id
+     * @return
+     */
+    @Override
+    public Employee getById(Long id) {
+         return employeeMapper.getById(id);
+    }
+
+    @Override
+    public void editPassword(PasswordEditDTO passwordEditDTO) {
+
+        String oldPassword = passwordEditDTO.getOldPassword();
+        String newPassword = passwordEditDTO.getNewPassword();
+        if (newPassword == null || newPassword.equals("")){
+            throw new PasswordEditFailedException(MessageConstant.PASSWORD_EMPTY+","+MessageConstant.PASSWORD_EDIT_FAILED);
+        }else if (oldPassword.equals(newPassword)){
+            throw new PasswordEditFailedException(MessageConstant.PASSWORD_EXIST+","+MessageConstant.PASSWORD_EDIT_FAILED);
+        }else {
+            employeeMapper.editPassword(passwordEditDTO);
+        }
+
+    }
+
+    /**
+     * 修改员工信息
+     * @param employeeDTO
+     */
+    @Override
+    public void update(EmployeeDTO employeeDTO) {
+        Employee employee = new Employee();
+        BeanUtils.copyProperties(employeeDTO, employee);
+        employee.setUpdateTime(LocalDateTime.now());
+        employee.setUpdateUser(BaseContext.getCurrentId());
+        BaseContext.removeCurrentId();
+        employeeMapper.update(employee);
+    }
+
+    /**
+     * 启用或禁用员工账号
+     * @param status
+     * @param id
+     */
+    @Override
+    public void startOrStop(Integer status, Long id) {
+        Employee employee = Employee.builder().
+                status(status).
+                id(id).build();
+        employeeMapper.update(employee);
+    }
+
+
 
 }
