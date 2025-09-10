@@ -16,6 +16,7 @@
             </set>
             <where>id = #{id}</where>
     </update>
+
     <select id="queryPage" resultType="com.sky.entity.Employee">
         select * from employee
         <where>
