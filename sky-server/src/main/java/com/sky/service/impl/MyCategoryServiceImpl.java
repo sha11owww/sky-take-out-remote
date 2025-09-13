@@ -53,13 +53,6 @@ public class MyCategoryServiceImpl implements MyCategoryService {
         Category category = new Category();
         BeanUtils.copyProperties(categoryDTO, category);
         category.setStatus(StatusConstant.DISABLE);
-
-        category.setCreateTime(LocalDateTime.now());
-        category.setUpdateTime(LocalDateTime.now());
-        category.setCreateUser(BaseContext.getCurrentId());
-        category.setUpdateUser(BaseContext.getCurrentId());
-
-        BaseContext.removeCurrentId();
         myCategoryMapper.insert(category);
 
     }
@@ -75,10 +68,8 @@ public class MyCategoryServiceImpl implements MyCategoryService {
     public void update(CategoryDTO categoryDTO) {
         Category category = new Category();
         BeanUtils.copyProperties(categoryDTO, category);
-        category.setUpdateTime(LocalDateTime.now());
-        category.setUpdateUser(BaseContext.getCurrentId());
         myCategoryMapper.update(category);
-        BaseContext.removeCurrentId();
+
 
     }
 
@@ -86,10 +77,7 @@ public class MyCategoryServiceImpl implements MyCategoryService {
     public void startOrStop(Integer status, Long id) {
        Category category = Category.builder().
                 status(status).
-                id(id).
-                updateTime(LocalDateTime.now()).
-                updateUser(BaseContext.getCurrentId())
-        .build();
+                id(id).build();
         myCategoryMapper.update(category);
     }
 
